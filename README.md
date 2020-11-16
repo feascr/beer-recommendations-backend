@@ -1,3 +1,4 @@
 # beer-recommendations-backend
 
-test as collaborator
+Petrov, Satyukov, Suslov
+gr.3530904/70102
