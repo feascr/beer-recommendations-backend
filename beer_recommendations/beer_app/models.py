@@ -7,6 +7,7 @@ class Beer(models.Model):
     beer_style = models.CharField(max_length=100)
     brewery_name = models.CharField(max_length=100)
     beer_abv = models.DecimalField(max_digits=5, decimal_places=2)
+    beer_image = models.ImageField(upload_to='beer', default='images.jpg', max_length=254)
 
 class BeerReview(models.Model):
     review_user = models.ForeignKey(User, on_delete=models.CASCADE)
