@@ -177,6 +177,7 @@ except (Exception, psycopg2.DatabaseError) as error:
     print("Error: %s" % error)
     cursor.execute('ROLBACK;')
     cursor.close()
+    conn.close()
     sys.exit(1)
 print('Table is truncated')
 
@@ -187,6 +188,7 @@ except (Exception, psycopg2.DatabaseError) as error:
     print("Error: %s" % error)
     cursor.execute('ROLBACK;')
     cursor.close()
+    conn.close()
     sys.exit(1)
 print('Copy to db')
 cursor.execute('COMMIT;')
