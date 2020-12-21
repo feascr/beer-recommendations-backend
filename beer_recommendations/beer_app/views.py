@@ -5,7 +5,7 @@ from beer.models import Beer, BeerReview, BeerRecommendation
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.db.models import Avg, F, OuterRef, When, Value, Exists, Case, Q, Subquery
+from django.db.models import Avg, F, OuterRef, Value, Q, Subquery
 from beer.serializers import (BeerListSerializer, BeerDetailSerializer,
 							  BeerReviewListSerializer, BeerReviewPutPostSerializer, BeerReviewDetailSerializer,
 							  BeerRecommendationSerializer,
