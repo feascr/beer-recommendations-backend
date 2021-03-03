@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from beer.models import Beer, BeerReview, BeerRecommendation
+from beer_app.models import Beer, BeerReview, BeerRecommendation
 from django.conf import settings
 from django.db.models import Avg, Count, F
 from django.contrib.auth.models import User

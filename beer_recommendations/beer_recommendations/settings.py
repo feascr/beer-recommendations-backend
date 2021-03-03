@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'beer.apps.BeerConfig',
+    'beer_app.apps.BeerAppConfig',
     'django_extensions'
 ]
 
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tutorial.urls'
+ROOT_URLCONF = 'beer_app.urls'
 
 TEMPLATES = [
     {

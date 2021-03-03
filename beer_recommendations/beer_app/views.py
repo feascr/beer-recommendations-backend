@@ -1,15 +1,15 @@
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.authentication import TokenAuthentication
-from beer.models import Beer, BeerReview, BeerRecommendation
+from beer_app.models import Beer, BeerReview, BeerRecommendation
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.db.models import Avg, F, OuterRef, Value, Q, Subquery
-from beer.serializers import (BeerListSerializer, BeerDetailSerializer,
-							  BeerReviewListSerializer, BeerReviewPutPostSerializer, BeerReviewDetailSerializer,
-							  BeerRecommendationSerializer,
-							  UserSerializer, BeerRatingSerializer)
+from beer_app.serializers import (BeerListSerializer, BeerDetailSerializer,
+			 					  BeerReviewListSerializer, BeerReviewPutPostSerializer, BeerReviewDetailSerializer,
+								  BeerRecommendationSerializer,
+								  UserSerializer, BeerRatingSerializer)
 
 class BeerList(generics.ListAPIView):
 	permission_classes = [permissions.IsAuthenticated]

@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken import views as auth_views
-from beer import views as beer_views
+from beer_app import views as beer_views
 
 urlpatterns = [
     path('beer', beer_views.BeerList.as_view()),
