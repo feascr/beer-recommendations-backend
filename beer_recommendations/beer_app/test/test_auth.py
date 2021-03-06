@@ -23,7 +23,9 @@ class SignUpTests(APITestCase):
         """
         user_counts = User.objects.count()
         url = '/registration'
+        # data for request
         data = {'email': 'test@user.com', 'password': 'test_password'}
+        # post request to url with data in json format 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, {'email': 'test@user.com'})
@@ -39,7 +41,7 @@ class SignUpTests(APITestCase):
         data = {'email': 'testuser.com', 'password': 'test_password'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # TODO: try to bypass implicit ErrorDetail instansiation
+        # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'email': [ErrorDetail('Enter a valid email address.', code='invalid')]})
         self.assertEqual(User.objects.count(), user_counts)
         self.assertNotEqual(User.objects.latest('id').email, 'testuser.com')
@@ -90,7 +92,7 @@ class SignUpTests(APITestCase):
         data = {'email': 'test@user.com', 'password': 'test_password_new'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # TODO: try to bypass implicit ErrorDetail instansiation
+        # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'email': [ErrorDetail('This field must be unique.', code='unique')]})
         self.assertEqual(User.objects.count(), user_counts)
         self.assertEqual(User.objects.latest('id').id, user_id)
@@ -109,7 +111,7 @@ class SignUpTests(APITestCase):
 
         user_token = str(User.objects.latest('id').auth_token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # TODO: try to bypass implicit ErrorDetail instansiation
+        # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'token': user_token})
 
     def test_sign_in_with_invalid_password(self):
@@ -125,7 +127,7 @@ class SignUpTests(APITestCase):
         response = self.client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # TODO: try to bypass implicit ErrorDetail instansiation
+        # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'non_field_errors': [ErrorDetail('Unable to log in with provided credentials.', code='authorization')]})
 
     """
