@@ -46,9 +46,9 @@ class SignUpTests(APITestCase):
         self.assertEqual(User.objects.count(), user_counts)
         self.assertNotEqual(User.objects.latest('id').email, 'testuser.com')
 
-    def test_create_account_without_data(self):
+    def test_create_account_with_blank_fields(self):
         """
-        Test attempt to register User without data in request body.
+        Test attempt to register User with blank fields.
         """
         user_counts = User.objects.count()
         url = '/registration'
@@ -62,9 +62,9 @@ class SignUpTests(APITestCase):
                                         })
         self.assertEqual(User.objects.count(), user_counts)
 
-    def test_create_account_without_field(self):
+    def test_create_account_without_fields(self):
         """
-        Test attempt to register User without required fields in request body.
+        Test attempt to register User without required fields.
         """
         user_counts = User.objects.count()
         url = '/registration'
@@ -114,6 +114,22 @@ class SignUpTests(APITestCase):
         # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'token': user_token})
 
+    def test_sign_in_with_invalid_username(self):
+        """
+        Test attempt to sing in User with invalid username.
+        """
+        url = '/registration'
+        data = {'email': 'test@user.com', 'password': 'test_password'}
+        response = self.client.post(url, data, format='json')
+
+        url = '/api-token-auth'
+        data = {'username': 'testuser.com', 'password': 'test_password'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO: try to bypass explicit ErrorDetail instansiation
+        self.assertEqual(response.data, {'non_field_errors': [ErrorDetail('Unable to log in with provided credentials.', code='authorization')]})
+
     def test_sign_in_with_invalid_password(self):
         """
         Test attempt to sing in User with invalid password.
@@ -129,9 +145,41 @@ class SignUpTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # TODO: try to bypass explicit ErrorDetail instansiation
         self.assertEqual(response.data, {'non_field_errors': [ErrorDetail('Unable to log in with provided credentials.', code='authorization')]})
+    
+    def test_sign_in_with_blank_fields(self):
+        """
+        Test attempt to sing in User with blank fields.
+        """
+        url = '/registration'
+        data = {'email': 'test@user.com', 'password': 'test_password2'}
+        response = self.client.post(url, data, format='json')
 
-    """
-    TODO:
-        - Test sign in with blank fields
-        - Test sign in without fields
-    """
+        url = '/api-token-auth'
+        data = {'username': '', 'password': ''}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO: try to bypass implicit ErrorDetail instansiation
+        self.assertEqual(response.data, {
+                                            'username': [ErrorDetail('This field may not be blank.', code='blank')], 
+                                            'password': [ErrorDetail('This field may not be blank.', code='blank')]
+                                        })
+
+    def test_sign_in_without_fields(self):
+        """
+        Test attempt to sing in User without fields.
+        """
+        url = '/registration'
+        data = {'email': 'test@user.com', 'password': 'test_password2'}
+        response = self.client.post(url, data, format='json')
+
+        url = '/api-token-auth'
+        data = {'username_fake': 'test_str'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO: try to bypass implicit ErrorDetail instansiation
+        self.assertEqual(response.data, {
+                                            'username': [ErrorDetail('This field is required.', code='required')], 
+                                            'password': [ErrorDetail('This field is required.', code='required')]
+                                        })
