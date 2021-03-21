@@ -52,7 +52,6 @@ class BeerReviewList(generics.ListAPIView):
 	def get_queryset(self, *args, **kwargs):
 		queryset = BeerReview.objects.all().filter(review_user=self.request.user).order_by(F('review_time').desc(nulls_last=True))
 		queryset = queryset.annotate(beer_name=F('review_beer__beer_name'), beer_style=F('review_beer__beer_style'), beer_image=F('review_beer__beer_image'))
-		print(queryset[0].beer_image)
 		return queryset
 
 class BeerReviewPost(generics.CreateAPIView):
