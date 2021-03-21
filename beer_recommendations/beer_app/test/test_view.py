@@ -57,14 +57,16 @@ class BeerListViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_get_beer_list_returns_valid_data(self):
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer'
         # get request to url 
         response = self.client.get(url, format='json')
-        # assert data field (contating dict) as you wish
+        # assert data field (containing dict) as you wish
 
         # assert that results contains only 10 elements (pagination) 
         # good practice is to use framework settings for this purpose (./beer_recommendations/settings.py)
@@ -85,8 +87,10 @@ class BeerListViewTests(APITestCase):
     def test_get_beer_list_returns_valid_redirection_chains(self):
         # calculate number of pages
         num_pages = math.ceil(Beer.objects.count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer'
@@ -100,7 +104,7 @@ class BeerListViewTests(APITestCase):
 
         # check redirection to next page
         visited_pages = 1
-        while (visited_pages - 1) < NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
+        while visited_pages <= NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
             next_url = response.data['next']
             if next_url is not None:
                 response = self.client.get(next_url, format='json')
@@ -109,9 +113,6 @@ class BeerListViewTests(APITestCase):
             else:
                 break
 
-        # calculate number of pages
-        num_pages = math.ceil(Beer.objects.count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
-        
         url = '/beer?page={}'.format(num_pages)
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -121,22 +122,24 @@ class BeerListViewTests(APITestCase):
     def test_get_beer_list_with_filters(self):
         # calculate number of pages
         num_beers = Beer.objects.all().filter(beer_name__icontains='Light').filter(beer_style__icontains='Lager').count()
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer?beer_style=Lager&beer_name=Light'
         # get request to url with following all redirections 
         response = self.client.get(url, format='json')
         # assert that response data count is equal to true count after filtering 
-        self.assertEqual(response.data['count'], 480)
+        self.assertEqual(response.data['count'], num_beers)
 
 
 class BeerDetailViewTests(APITestCase):
     
-    def test_get_beer_list_with_valid_token(self):
+    def test_get_beer_detail_with_valid_token(self):
         """
-        Ensure we can get beer list with valid token.
+        Ensure we can get beer detail with valid token.
         """
         # test username
         test_user_name = 'stcules'
@@ -151,7 +154,7 @@ class BeerDetailViewTests(APITestCase):
         # assert status code equal 200
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_get_beer_list_with_invalid_token(self):
+    def test_get_beer_detail_with_invalid_token(self):
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -164,7 +167,7 @@ class BeerDetailViewTests(APITestCase):
         # ErrorDetail is error class that write errors to response data
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
-    def test_get_beer_list_without_token_header(self):
+    def test_get_beer_detail_without_token_header(self):
         # url for request        
         url = '/beer/100'
         # get request to url 
@@ -174,9 +177,11 @@ class BeerDetailViewTests(APITestCase):
         # assert that data contains message about not provided credentials
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
     
-    def test_get_beer_list_returns_without_beer_id(self):
+    def test_get_beer_detail_returns_without_beer_id(self):
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer/'
@@ -185,9 +190,11 @@ class BeerDetailViewTests(APITestCase):
         # test that status code equals 404
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_beer_list_returns_valid_data_without_review_id(self):
+    def test_get_beer_detail_returns_valid_data_without_review_id(self):
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer/100'
@@ -207,9 +214,11 @@ class BeerDetailViewTests(APITestCase):
         self.assertTrue('/media/images.jpg' in response.data['beer_image'])
         self.assertEqual(response.data['is_reviewed'], None)
 
-    def test_get_beer_list_returns_valid_data_with_review_id(self):
+    def test_get_beer_detail_returns_valid_data_with_review_id(self):
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer/38567'
@@ -286,8 +295,10 @@ class BeerRatingsViewTests(APITestCase):
     def test_get_beer_list_returns_valid_redirection_chains(self):
         # calculate number of pages
         num_pages = math.ceil(Beer.objects.count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer_rates'
@@ -301,7 +312,7 @@ class BeerRatingsViewTests(APITestCase):
 
         # check redirection to next page
         visited_pages = 1
-        while (visited_pages - 1) < NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
+        while visited_pages <= NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
             next_url = response.data['next']
             if next_url is not None:
                 response = self.client.get(next_url, format='json')
@@ -369,8 +380,10 @@ class BeerReviewListViewTests(APITestCase):
         # post request to url with data in json format 
         response = self.client.post(url, data, format='json')
 
+        # test username
+        test_user_name = 'test@user.com'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='test@user.com')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer_review'
@@ -381,8 +394,10 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(len(response.data['results']), 0)
 
     def test_get_beer_review_list_with_many_reviews_user(self):
+        # test username
+        test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
-        user = User.objects.get(username='stcules')
+        user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
         # url for request  
         url = '/beer_review'
@@ -404,8 +419,10 @@ class BeerReviewListViewTests(APITestCase):
         self.assertTrue('beer_image' in first_beer_data)
         self.assertTrue('review_overall' in first_beer_data)
 
-    def test_get_beer_list_returns_valid_redirection_chains(self):
-        user = User.objects.get(username='stcules')
+    def test_get_beer_review_list_returns_valid_redirection_chains(self):
+        # test username
+        test_user_name = 'stcules'
+        user = User.objects.get(username=test_user_name)
         # calculate number of pages
         num_pages = math.ceil(BeerReview.objects.all().filter(review_user=user).count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
         # we can force authenticate user to bypass explicit token usage
@@ -422,7 +439,7 @@ class BeerReviewListViewTests(APITestCase):
 
         # check redirection to next page
         visited_pages = 1
-        while (visited_pages - 1) < NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
+        while visited_pages <= NUMBER_NEXT_PAGES_TO_CHECK and visited_pages <= num_pages:
             next_url = response.data['next']
             if next_url is not None:
                 response = self.client.get(next_url, format='json')
@@ -436,3 +453,97 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # assert that response data isn't refer to next page (is None) 
         self.assertTrue(response.data['next'] is None)
+
+class BeerReviewDetailViewTests(APITestCase):
+    
+    def test_get_beer_review_detail_for_reviewed_beer_with_valid_token(self):
+        """
+        Ensure we can get beer review detail for reviewed beer with valid token.
+        """
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request        
+        url = '/beer_review/973423'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test assertions below
+        # assert status code equal 200
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # test that beer review detail contains valid information
+        self.assertEqual(response.data['id'], 973423)
+        self.assertEqual(response.data['review_beer'], 38567)
+        self.assertEqual(response.data['review_time'], '2012-01-06T12:21:32Z')
+        self.assertEqual(response.data['beer_name'], 'Karlsberg Black Baron')
+        self.assertEqual(response.data['beer_style'], 'Schwarzbier')
+        self.assertTrue('/media/images.jpg' in response.data['beer_image'])
+        self.assertEqual(response.data['review_overall'], Decimal('2.0'))
+        self.assertEqual(response.data['review_aroma'], Decimal('2.0'))
+        self.assertEqual(response.data['review_appearance'], Decimal('3.0'))
+        self.assertEqual(response.data['review_palate'], Decimal('2.0'))
+        self.assertEqual(response.data['review_taste'], Decimal('2.0'))
+
+    def test_get_beer_review_detail_with_invalid_token(self):
+        # mannually add invalid credentials to all requests from client 
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
+        # url for request        
+        url = '/beer/973423'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about invalid token
+        # ErrorDetail is error class that write errors to response data
+        self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
+
+    def test_get_beer_review_detail_without_token_header(self):
+        # url for request        
+        url = '/beer/973423'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about not provided credentials
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
+    
+    def test_get_beer_review_detail_returns_without_beer_review_id(self):
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request  
+        url = '/beer_review/'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test that status code equals 404
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_beer_review_detail_with_review_id_of_another_user(self):
+        # url for request        
+        url = '/beer_review/973421'
+        # review author username
+        author_user_name = 'Boto'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it 
+        user = User.objects.get(username=author_user_name)
+        self.client.force_authenticate(user=user)
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test authorship of this user
+        # assert status code equal 200
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test assertions below
+        # assert status code equal 404
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # assert that data contains message about not found beer review detail 
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Not found.', code='not_found')})
