@@ -84,12 +84,12 @@ class BeerReviewDetail(generics.RetrieveAPIView):
 		queryset = queryset.annotate(beer_name=F('review_beer__beer_name'), beer_style=F('review_beer__beer_style'), beer_image=F('review_beer__beer_image'))
 		return queryset
 
-class BeerRecommendationPost(generics.CreateAPIView):
-	permission_classes = [permissions.IsAdminUser]
-	serializer_class = BeerRecommendationSerializer
+# class BeerRecommendationPost(generics.CreateAPIView):
+# 	permission_classes = [permissions.IsAdminUser]
+# 	serializer_class = BeerRecommendationSerializer
 
-	def perform_create(self, serializer):
-		serializer.save(recommendation_user=self.request.user)
+# 	def perform_create(self, serializer):
+# 		serializer.save(recommendation_user=self.request.user)
 
 class BeerRecommendationDetail(generics.ListAPIView):
 	permission_classes = [permissions.IsAuthenticated]
