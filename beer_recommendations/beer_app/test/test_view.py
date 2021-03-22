@@ -547,3 +547,59 @@ class BeerReviewDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         # assert that data contains message about not found beer review detail 
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Not found.', code='not_found')})
+
+
+class BeerRecommendationDetailViewTests(APITestCase):
+    
+    def test_get_beer_recommendation_detail_with_valid_token(self):
+        """
+        Ensure we can get beer recommendation detail with valid token.
+        """
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request        
+        url = '/beer_recs'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test assertions below
+        # assert status code equal 200
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # test that beer recommendation detail contains valid information
+        results_dict = response.data['results'][0]
+        self.assertEqual(results_dict['id'], 1)
+        self.assertEqual(results_dict['top1_beer'], 59054)
+        self.assertEqual(results_dict['top2_beer'], 60682)
+        self.assertEqual(results_dict['top3_beer'], 50318)
+        self.assertEqual(results_dict['top4_beer'], 37600)
+        self.assertEqual(results_dict['top5_beer'], 54313)
+        self.assertEqual(results_dict['top6_beer'], 3641)
+        self.assertEqual(results_dict['top7_beer'], 36603)
+        self.assertEqual(results_dict['top8_beer'], 14222)
+        self.assertEqual(results_dict['top9_beer'], 32401)
+        self.assertEqual(results_dict['top10_beer'], 21497)
+
+    def test_get_beer_recommendation_detail_with_invalid_token(self):
+        # mannually add invalid credentials to all requests from client 
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
+        # url for request        
+        url = '/beer_recs'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about invalid token
+        # ErrorDetail is error class that write errors to response data
+        self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
+
+    def test_get_beer_recommendation_detail_without_token_header(self):
+        # url for request        
+        url = '/beer_recs'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about not provided credentials
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
