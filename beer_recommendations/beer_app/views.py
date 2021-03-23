@@ -62,7 +62,6 @@ class BeerReviewPost(generics.CreateAPIView):
 	def perform_create(self, serializer):
 		serializer.save(review_user=self.request.user)
 
-
 class BeerReviewPut(generics.UpdateAPIView):
 	permission_classes = [permissions.IsAuthenticated]
 	queryset = BeerReview.objects.all()
