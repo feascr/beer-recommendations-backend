@@ -459,7 +459,7 @@ class BeerReviewPostViewTests(APITestCase):
     
     def test_create_beer_review_with_valid_token(self):
         """
-        Ensure we can create a berr review with valid token.
+        Ensure we can create a beer review with valid token.
         """
         review_counts = BeerReview.objects.count()
         # test username
@@ -536,8 +536,10 @@ class BeerReviewPostViewTests(APITestCase):
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
         user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
+        # url for request  
         url = '/beer_review_post'
-        data = {'review_beer': BeerReview.objects.latest('id').review_beer.id + 1, 
+        inexisted_beer_id = BeerReview.objects.latest('id').review_beer.id + 1
+        data = {'review_beer': inexisted_beer_id, 
                 'review_overall': 3.0,
                 'review_aroma': 3,
                 'review_appearance': 2,
@@ -547,7 +549,8 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # TODO: try to bypass implicit ErrorDetail instansiation
         self.assertEqual(response.data, {
-                                            'review_beer': [ErrorDetail('Invalid pk \"66056\" - object does not exist.', code='does_not_exist')], 
+                                            'review_beer': [ErrorDetail('Invalid pk \"{}\" - object does not exist.'.format(str(inexisted_beer_id)), 
+                                                                        code='does_not_exist')], 
                                         })
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
@@ -558,6 +561,7 @@ class BeerReviewPostViewTests(APITestCase):
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
         user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
+        # url for request  
         url = '/beer_review_post'
         data = {'review_beer': 'one hundred', 
                 'review_overall': 'three.',
@@ -576,7 +580,6 @@ class BeerReviewPostViewTests(APITestCase):
                                             'review_palate': [ErrorDetail('A valid integer is required.', code='invalid')], 
                                             'review_taste': [ErrorDetail('A valid integer is required.', code='invalid')]
                                         })
-        print(response.data['review_taste'])
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_create_beer_review_with_blank_fields(self):
@@ -586,6 +589,7 @@ class BeerReviewPostViewTests(APITestCase):
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
         user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
+        # url for request  
         url = '/beer_review_post'
         data = {'review_beer': None, 
                 'review_overall': None,
@@ -613,6 +617,7 @@ class BeerReviewPostViewTests(APITestCase):
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
         user = User.objects.get(username=test_user_name)
         self.client.force_authenticate(user=user)
+        # url for request  
         url = '/beer_review_post'
         data = {'fake_string': 'fake_string'}
         response = self.client.post(url, data, format='json')
@@ -631,8 +636,168 @@ class BeerReviewPostViewTests(APITestCase):
 
 class BeerReviewPutViewTests(APITestCase):
     
-    def function():
-        pass
+    def test_update_beer_review_with_valid_token(self):
+        """
+        Ensure we can update a beer review with valid token.
+        """
+        review_counts = BeerReview.objects.count()
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        
+        # test user has reviewed such beer
+        # url for request        
+        url = '/beer/1'
+        # get request to url 
+        response = self.client.get(url, format='json')
+        # test that beer detail contains valid information
+        self.assertEqual(response.data['id'], 1)
+        self.assertEqual(response.data['is_reviewed'], 1)
+
+        # url for request 
+        url = '/beer_review_put'
+        # data for request
+        data = {'id': 1,
+                'review_beer': 1, 
+                'review_overall': 3.0,
+                'review_aroma': 3,
+                'review_appearance': 2,
+                'review_palate': 4,
+                'review_taste': 3}
+        # post request to url with data in json format 
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BeerReview.objects.count(), review_counts)
+        self.assertEqual(BeerReview.objects.get(id=1).review_beer.id, 1)
+        self.assertEqual(BeerReview.objects.get(id=1).review_overall, Decimal(3.0))
+        self.assertEqual(BeerReview.objects.get(id=1).review_aroma, Decimal(3.0))
+        self.assertEqual(BeerReview.objects.get(id=1).review_appearance, Decimal(2.0))
+        self.assertEqual(BeerReview.objects.get(id=1).review_palate, Decimal(4.0))
+        self.assertEqual(BeerReview.objects.get(id=1).review_taste, Decimal(3.0))
+
+    def test_update_beer_review_with_invalid_credentials(self):
+        # mannually add invalid credentials to all requests from client 
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
+        # url for request        
+        url = '/beer_review_put'
+        # get request to url 
+        response = self.client.put(url, format='json')
+        # test assertions below
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about invalid token
+        # ErrorDetail is error class that write errors to response data
+        self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
+
+    def test_update_beer_review_without_credentials_header(self):
+        # url for request        
+        url = '/beer_review_put'
+        # get request to url 
+        response = self.client.put(url, format='json')
+        # test assertions below
+        # assert status code equal 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # assert that data contains message about invalid token
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
+
+    def test_update_beer_review_for_inexisted_review(self):
+        review_counts = BeerReview.objects.count()
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request  
+        url = '/beer_review_put'
+        inexisted_review_id = BeerReview.objects.latest('id').id + 1
+        data = {'id': inexisted_review_id,
+                'review_beer': 1, 
+                'review_overall': 3.0,
+                'review_aroma': 3,
+                'review_appearance': 2,
+                'review_palate': 4,
+                'review_taste': 3}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # assert that data contains message about not found beer review detail 
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Not found.', code='not_found')})
+        self.assertEqual(BeerReview.objects.count(), review_counts)
+
+    def test_update_beer_review_with_invalid_data(self):
+        review_counts = BeerReview.objects.count()
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request  
+        url = '/beer_review_put'
+        data = {'id': 1,
+                'review_beer': 'one', 
+                'review_overall': 'three.',
+                'review_aroma': 'three',
+                'review_appearance': 'two',
+                'review_palate': 4.5,
+                'review_taste': 'string'}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO: try to bypass implicit ErrorDetail instansiation
+        self.assertEqual(response.data, {
+                                            'review_beer': [ErrorDetail('Incorrect type. Expected pk value, received str.', code='incorrect_type')], 
+                                            'review_overall': [ErrorDetail('A valid number is required.', code='invalid')],
+                                            'review_aroma': [ErrorDetail('A valid integer is required.', code='invalid')], 
+                                            'review_appearance': [ErrorDetail('A valid integer is required.', code='invalid')],
+                                            'review_palate': [ErrorDetail('A valid integer is required.', code='invalid')], 
+                                            'review_taste': [ErrorDetail('A valid integer is required.', code='invalid')]
+                                        })
+        self.assertEqual(BeerReview.objects.count(), review_counts)
+
+    def test_update_beer_review_with_blank_fields(self):
+        review_counts = BeerReview.objects.count()
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request  
+        url = '/beer_review_put'
+        data = {'id': None,
+                'review_beer': None, 
+                'review_overall': None,
+                'review_aroma': None,
+                'review_appearance': None,
+                'review_palate': None,
+                'review_taste': None}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # assert that data contains message about not found beer review detail 
+        self.assertEqual(response.data, {'detail': ErrorDetail(string='Not found.', code='not_found')})
+        self.assertEqual(BeerReview.objects.count(), review_counts)
+
+    def test_update_beer_review_without_fields(self):
+        review_counts = BeerReview.objects.count()
+        # test username
+        test_user_name = 'stcules'
+        # we can force authenticate user to bypass explicit token usage when we don't need to test it
+        user = User.objects.get(username=test_user_name)
+        self.client.force_authenticate(user=user)
+        # url for request  
+        url = '/beer_review_put'
+        data = {'id': 1, 'fake_string': 'fake_string'}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO: try to bypass implicit ErrorDetail instansiation
+        self.assertEqual(response.data, {
+                                            'review_beer': [ErrorDetail('This field is required.', code='required')], 
+                                            'review_overall': [ErrorDetail('This field is required.', code='required')],
+                                            'review_aroma': [ErrorDetail('This field is required.', code='required')], 
+                                            'review_appearance': [ErrorDetail('This field is required.', code='required')],
+                                            'review_palate': [ErrorDetail('This field is required.', code='required')], 
+                                            'review_taste': [ErrorDetail('This field is required.', code='required')]
+                                        })
+        self.assertEqual(BeerReview.objects.count(), review_counts)
 
 
 class BeerReviewDetailViewTests(APITestCase):
