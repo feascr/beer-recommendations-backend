@@ -32,6 +32,9 @@ class BeerListViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_get_beer_list_with_invalid_credentials(self):
+        """
+        Get beer list with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -46,6 +49,9 @@ class BeerListViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_list_without_credentials_header(self):
+        """
+        Get beer list without credentials header.
+        """
         # url for request        
         url = '/beer'
         # get request to url 
@@ -57,6 +63,9 @@ class BeerListViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_get_beer_list_returns_valid_data(self):
+        """
+        Ensure get beer list return valid data.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -85,6 +94,9 @@ class BeerListViewTests(APITestCase):
         self.assertTrue('beer_image' in first_beer_data)
 
     def test_get_beer_list_returns_valid_redirection_chains(self):
+        """
+        Ensure get beer list creates correct redirection chains.
+        """
         # calculate number of pages
         num_pages = math.ceil(Beer.objects.count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
         # test username
@@ -120,6 +132,9 @@ class BeerListViewTests(APITestCase):
         self.assertTrue(response.data['next'] is None)
 
     def test_get_beer_list_with_filters(self):
+        """
+        Ensure get beer list correctly process filters in url query.
+        """
         # calculate number of pages
         num_beers = Beer.objects.all().filter(beer_name__icontains='Light').filter(beer_style__icontains='Lager').count()
         # test username
@@ -155,6 +170,9 @@ class BeerDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_get_beer_detail_with_invalid_token(self):
+        """
+        Ensure get beer detail returns error when inavlid token pass.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -168,6 +186,9 @@ class BeerDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_detail_without_token_header(self):
+        """
+        Ensure get beer detail returns error when request doesn't contains credentials header.
+        """
         # url for request        
         url = '/beer/100'
         # get request to url 
@@ -178,6 +199,9 @@ class BeerDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
     
     def test_get_beer_detail_returns_without_beer_id(self):
+        """
+        Ensure get beer detail returns 404 codee without beer id.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -191,6 +215,9 @@ class BeerDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_beer_detail_returns_valid_data_without_review_id(self):
+        """
+        Ensure get beer detail returns valid data when user didn't review this beer.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -215,6 +242,9 @@ class BeerDetailViewTests(APITestCase):
         self.assertEqual(response.data['is_reviewed'], None)
 
     def test_get_beer_detail_returns_valid_data_with_review_id(self):
+        """
+        Ensure get beer detail returns valid data when user reviewed this beer.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -270,6 +300,9 @@ class BeerRatingsViewTests(APITestCase):
         self.assertTrue('beer_image' in response.data['results'][0])
 
     def test_get_beer_rates_with_invalid_token(self):
+        """
+        Ensure we can't get beer rates without valid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -283,6 +316,9 @@ class BeerRatingsViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_list_without_token_header(self):
+        """
+        Ensure we can't get beer rates without credentials header.
+        """
         # url for request        
         url = '/beer_rates'
         # get request to url 
@@ -293,6 +329,9 @@ class BeerRatingsViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_get_beer_list_returns_valid_redirection_chains(self):
+        """
+        Ensure get beer rates creates correct redirection chain.
+        """
         # calculate number of pages
         num_pages = math.ceil(Beer.objects.count() / settings.REST_FRAMEWORK['PAGE_SIZE'])
         # test username
@@ -349,6 +388,9 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_get_beer_review_list_with_invalid_credentials(self):
+        """
+        Ensure we can't get beer reviews list with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -363,6 +405,9 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_review_list_without_credentials_header(self):
+        """
+        Ensure we can't get beer reviews list without creadentials header.
+        """
         # url for request        
         url = '/beer_review'
         # get request to url 
@@ -374,6 +419,9 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_get_beer_review_list_with_zero_review_user(self):
+        """
+        Ensure get beer reviews list returns zero results for user without reviews.
+        """
         url = '/registration'
         # data for request
         data = {'email': 'test@user.com', 'password': 'test_password'}
@@ -394,6 +442,9 @@ class BeerReviewListViewTests(APITestCase):
         self.assertEqual(len(response.data['results']), 0)
 
     def test_get_beer_review_list_with_many_reviews_user(self):
+        """
+        Ensure get beer review list returns valid data for user with manyh reviews.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -420,6 +471,9 @@ class BeerReviewListViewTests(APITestCase):
         self.assertTrue('review_overall' in first_beer_data)
 
     def test_get_beer_review_list_returns_valid_redirection_chains(self):
+        """
+        Ensure get beer review list creates correct redirection chain.
+        """
         # test username
         test_user_name = 'stcules'
         user = User.objects.get(username=test_user_name)
@@ -505,6 +559,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(response.data['is_reviewed'], BeerReview.objects.latest('id').id)
 
     def test_create_beer_review_with_invalid_credentials(self):
+        """
+        Ensure we can't create a beer review with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -519,6 +576,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_create_beer_review_without_credentials_header(self):
+        """
+        Ensure we can't create a beer review without credentials header.
+        """
         # url for request        
         url = '/beer_review_post'
         # get request to url 
@@ -530,6 +590,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_create_beer_review_for_inexisted_beer(self):
+        """
+        Ensure we can't create a beer review for beer id which doesn't exist.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -555,6 +618,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_create_beer_review_with_invalid_data(self):
+        """
+        Ensure we can't create a beer review with invalid data.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -583,6 +649,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_create_beer_review_with_blank_fields(self):
+        """
+        Ensure we can't create a beer review with blank fields.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -611,6 +680,9 @@ class BeerReviewPostViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_create_beer_review_without_fields(self):
+        """
+        Ensure we can't create a beer review without required request fields.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -678,6 +750,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.get(id=1).review_taste, Decimal(3.0))
 
     def test_update_beer_review_with_invalid_credentials(self):
+        """
+        Ensure we can't update a beer review with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -692,6 +767,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_update_beer_review_without_credentials_header(self):
+        """
+        Ensure we can't update a beer review without credentials header.
+        """
         # url for request        
         url = '/beer_review_put'
         # get request to url 
@@ -703,6 +781,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_update_beer_review_for_inexisted_review(self):
+        """
+        Ensure we can't update a beer review with id that doesn't exist.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -726,6 +807,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_update_beer_review_with_invalid_data(self):
+        """
+        Ensure we can't update a beer review with invalid data.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -755,6 +839,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_update_beer_review_with_blank_fields(self):
+        """
+        Ensure we can't update a beer review with blank fields.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -777,6 +864,9 @@ class BeerReviewPutViewTests(APITestCase):
         self.assertEqual(BeerReview.objects.count(), review_counts)
 
     def test_update_beer_review_without_fields(self):
+        """
+        Ensure we can't update a beer review without required request fields.
+        """
         review_counts = BeerReview.objects.count()
         # test username
         test_user_name = 'stcules'
@@ -832,6 +922,9 @@ class BeerReviewDetailViewTests(APITestCase):
         self.assertEqual(response.data['review_taste'], Decimal('2.0'))
 
     def test_get_beer_review_detail_with_invalid_token(self):
+        """
+        Ensure we can't get beer review detail with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -845,6 +938,9 @@ class BeerReviewDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_review_detail_without_token_header(self):
+        """
+        Ensure we can't get beer review detail without credentials header.
+        """
         # url for request        
         url = '/beer/973423'
         # get request to url 
@@ -855,6 +951,9 @@ class BeerReviewDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
     
     def test_get_beer_review_detail_returns_without_beer_review_id(self):
+        """
+        Ensure we can't get beer review detail without its id.
+        """
         # test username
         test_user_name = 'stcules'
         # we can force authenticate user to bypass explicit token usage when we don't need to test it
@@ -868,6 +967,9 @@ class BeerReviewDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_beer_review_detail_with_review_id_of_another_user(self):
+        """
+        Ensure we can't get beer review detail from another user.
+        """
         # url for request        
         url = '/beer_review/973421'
         # review author username
@@ -928,6 +1030,9 @@ class BeerRecommendationDetailViewTests(APITestCase):
         self.assertEqual(results_dict['top10_beer'], 21497)
 
     def test_get_beer_recommendation_detail_with_invalid_token(self):
+        """
+        Ensure we can't get beer recommendation detail with invalid token.
+        """
         # mannually add invalid credentials to all requests from client 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format('invalid_test'))
         # url for request        
@@ -941,6 +1046,9 @@ class BeerRecommendationDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail':  ErrorDetail(string='Invalid token.', code='authentication_failed')})
 
     def test_get_beer_recommendation_detail_without_token_header(self):
+        """
+        Ensure we can't get beer recommendation detail without credentials header.
+        """
         # url for request        
         url = '/beer_recs'
         # get request to url 
@@ -951,6 +1059,9 @@ class BeerRecommendationDetailViewTests(APITestCase):
         self.assertEqual(response.data, {'detail': ErrorDetail(string='Authentication credentials were not provided.', code='not_authenticated')})
 
     def test_get_beer_recommendation_detail_for_new_user(self):
+        """
+        Ensure we can get beer recommendation for a new user.
+        """
         url = '/registration'
         # data for request
         data = {'email': 'test@user.com', 'password': 'test_password'}

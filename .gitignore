@@ -5,3 +5,8 @@
 **/migrations
 **/media
 **/data_process
+**/htmlcov/
+**/.coverage
+**/.coverage.*
+**/coverage.xml
+**/*.cover
